@@ -8,11 +8,11 @@ wifi_users = []
 user_prirost = 0 #коэффициент прироста числа пользователей wifi, в среднем в день на 1
 
 try:
-  #читаем файл wifi_users и смотрим на datetime в последней строке
+  #читаем файл wifi_users и смотрим на datetime в первой строке
   with open('wifi_users.csv', encoding='utf-8-sig') as csvfile0:
     df_wifi_users = pd.read_csv(csvfile0, header=None)
-    last_row = len(df_wifi_users.index)-1
-    timestamp = datetime.datetime.strptime(df_wifi_users.loc[last_row,3], '%Y-%m-%d %H:%M:%S.%f')
+    date = datetime.datetime.strptime(df_wifi_users.loc[0,3], '%Y-%m-%d %H:%M:%S.%f').date()
+    timestamp = datetime.datetime.combine(date + datetime.timedelta(days = 1), datetime.datetime.min.time())
     user_prirost = (timestamp - start_date).days
 
 except Exception as e:
@@ -33,6 +33,7 @@ finally:
                     rn.randint(115,155), rn.randint(100,140), rn.randint(70,100), rn.randint(40,60)]
     for intensity in distribution:
       connection = intensity + user_prirost
+      print(f'intens: {intensity}, user_prirost: {user_prirost}')
 
 
       for i in range(connection):
