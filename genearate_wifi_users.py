@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 
 global timestamp
-timestamp = datetime.datetime.fromisoformat('2018-02-04 00:00:00.000')
+timestamp = datetime.datetime.strptime('2018-02-04 00:00:00.000', '%Y-%m-%d %H:%M:%S.%f')
 wifi_users = []
 user_prirost = 0 #коэффициент прироста числа пользователей wifi, в среднем в день на 1
 
@@ -12,8 +12,8 @@ try:
   with open('wifi_users.csv', encoding='utf-8-sig') as csvfile0:
     df_wifi_users = pd.read_csv(csvfile0, header=None)
     last_row = len(df_wifi_users.index)-1
-    timestamp = datetime.datetime.strptime(df_wifi_users.loc[last_row,2], '%Y-%m-%d %H:%M:%S.%f')
-    user_prirost = (timestamp - datetime.datetime.fromisoformat('2018-02-04 00:00:00.000')).days
+    timestamp = datetime.datetime.strptime(df_wifi_users.loc[last_row,3], '%Y-%m-%d %H:%M:%S.%f')
+    user_prirost = (timestamp - datetime.datetime.strptime('2018-02-04 00:00:00.000', '%Y-%m-%d %H:%M:%S.%f')).days
 
 except Exception as e:
     print(e)
@@ -111,7 +111,7 @@ finally:
                                               weights=[0.88,0.09,0.03], k=1)[0]        
 
 
-        wifi_users.append([phone_number, device, timestamp, duration, traffic, company_id])
+        wifi_users.append([phone_number, device, ident_type, timestamp, duration, traffic, company_id])
         df_wifi_users = pd.DataFrame(wifi_users)
 
   with open('wifi_users.csv', 'a', newline='', encoding='utf-8-sig') as csvfile2:
