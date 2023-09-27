@@ -2,36 +2,45 @@ import random as rn
 import datetime
 import pandas as pd
 
-global session_start
-session_start = datetime.datetime.now() - datetime.timedelta(days=2000)
+global timestamp
+timestamp = datetime.datetime.fromisoformat('2018-02-04 00:00:00.000')
 wifi_users = []
+user_prirost = 0 #коэффициент прироста числа пользователей wifi, в среднем в день на 1
 
-try: 
-  #читаем файла wifi_users и смотрим на datetime в последней строке
+try:
+  #читаем файл wifi_users и смотрим на datetime в последней строке
   with open('wifi_users.csv', encoding='utf-8-sig') as csvfile0:
     df_wifi_users = pd.read_csv(csvfile0, header=None)
     last_row = len(df_wifi_users.index)-1
-    session_start = datetime.datetime.strptime(df_wifi_users.loc[last_row,1], '%Y-%m-%d %H:%M:%S.%f')
+    timestamp = datetime.datetime.strptime(df_wifi_users.loc[last_row,2], '%Y-%m-%d %H:%M:%S.%f')
+    user_prirost = (timestamp - datetime.datetime.fromisoformat('2018-02-04 00:00:00.000')).days
 
-except:
-    print("file wifi_users.csv not exist!!")\
+except Exception as e:
+    print(e)
 
 finally:
-  #открываем rtk_users и по случайному юзеру генерируем трафик, длительность сессии и 
+  #открываем rtk_users и по случайному юзеру генерируем трафик, длительность сессии и
   #место его подключения
   with open('rtk_users.csv', newline='', encoding='utf-8-sig') as csvfile:
     df_rtk_users = pd.read_csv(csvfile, header=None)
-    
-    for i in range(1000):
 
-        row = rn.randint(0,len(df_rtk_users.index))
-        phone_number = df_rtk_users.loc[row,0]
-        age = df_rtk_users.loc[row,2]
+    #распределение количества подключения пользователей в течении суток (каждый час), эмпирически
+    distribution = [rn.randint(30,40), rn.randint(15,25), rn.randint(7,13), rn.randint(6,10), rn.randint(7,13),
+                    rn.randint(10,16), rn.randint(14,20), rn.randint(20,40), rn.randint(40,60), rn.randint(80,120),
+                    rn.randint(90,140), rn.randint(95,145), rn.randint(90,140), rn.randint(80,120), rn.randint(100,140),
+                    rn.randint(140,180), rn.randint(130,170), rn.randint(90,130), rn.randint(80,120), rn.randint(110,150),
+                    rn.randint(115,155), rn.randint(100,140), rn.randint(70,100), rn.randint(40,60)]
+    for intensity in distribution:
+
+
+      for i in range(intensity + user_prirost):
+
+        user = rn.randint(0,len(df_rtk_users.index)-1)
+        phone_number = df_rtk_users.loc[user,0]
+        age = df_rtk_users.loc[user,2]
 
         # генератор даты и времени
-        if 0 < session_start.hour < 5:
-            session_start += datetime.timedelta(hours=5)
-        session_start += datetime.timedelta(minutes=rn.randint(1,10))
+        timestamp += datetime.timedelta(hours = 1/intensity)
 
         # генератор выбора места от его веса для разных возрастов
         # генератор интервала времени по нормальному распределению
@@ -40,37 +49,37 @@ finally:
         if age < 21:
             priority_list = rn.choices(['Супермаркет', 'Торговый центр', 'Бизнес центр', 'Кинотеатр', 'Спортзал', 'Кафе', 'Парк', 'Вокзал', 'Гостиница', 'Поликлиника', 'Общественный транспорт', 'Автозаправка', 'Автомойка'],
                                               weights=[0.1,0.2,0,0.15,0.05,0.2,0.2,0,0,0,0.1,0,0], k=1)
-            session_duration = rn.randint(1, 360)
+            duration = rn.randint(1, 360)
             traffic = rn.randint(100, 1000)
 
         if 21 <= age < 31:
             priority_list = rn.choices(['Супермаркет', 'Торговый центр', 'Бизнес центр', 'Кинотеатр', 'Спортзал', 'Кафе', 'Парк', 'Вокзал', 'Гостиница', 'Поликлиника', 'Общественный транспорт', 'Автозаправка', 'Автомойка'],
                                               weights=[0.1,0.05,0.12,0.05,0.1,0.15,0.1,0.02,0.02,0.01,0.13,0.05,0.1], k=1)
-            session_duration = rn.randint(1, 300)
+            duration = rn.randint(1, 300)
             traffic = rn.randint(200, 700)
 
         if 31 <= age < 41:
             priority_list = rn.choices(['Супермаркет', 'Торговый центр', 'Бизнес центр', 'Кинотеатр', 'Спортзал', 'Кафе', 'Парк', 'Вокзал', 'Гостиница', 'Поликлиника', 'Общественный транспорт', 'Автозаправка', 'Автомойка'],
                                               weights=[0.1,0.05,0.1,0.05,0.12,0.1,0.12,0.04,0.05,0.04,0.15,0.03,0.05], k=1)
-            session_duration = rn.randint(1, 240)
+            duration = rn.randint(1, 240)
             traffic = rn.randint(100, 300)
 
         if 41 <= age < 51:
             priority_list = rn.choices(['Супермаркет', 'Торговый центр', 'Бизнес центр', 'Кинотеатр', 'Спортзал', 'Кафе', 'Парк', 'Вокзал', 'Гостиница', 'Поликлиника', 'Общественный транспорт', 'Автозаправка', 'Автомойка'],
                                               weights=[0.12,0.02,0.08,0.08,0.05,0.07,0.14,0.07,0.07,0.1,0.12,0.03,0.05], k=1)
-            session_duration = rn.randint(1, 120)
+            duration = rn.randint(1, 120)
             traffic = rn.randint(50, 100)
 
         if 51 <= age < 61:
             priority_list = rn.choices(['Супермаркет', 'Торговый центр', 'Бизнес центр', 'Кинотеатр', 'Спортзал', 'Кафе', 'Парк', 'Вокзал', 'Гостиница', 'Поликлиника', 'Общественный транспорт', 'Автозаправка', 'Автомойка'],
                                               weights=[0.12,0.01,0.08,0.08,0.05,0.04,0.18,0.07,0.07,0.1,0.12,0.03,0.05], k=1)
-            session_duration = rn.randint(1, 60)
+            duration = rn.randint(1, 60)
             traffic = rn.randint(10, 100)
 
         if age > 60:
             priority_list = rn.choices(['Супермаркет', 'Торговый центр', 'Бизнес центр', 'Кинотеатр', 'Спортзал', 'Кафе', 'Парк', 'Вокзал', 'Гостиница', 'Поликлиника', 'Общественный транспорт', 'Автозаправка', 'Автомойка'],
                                               weights=[0.12,0.01,0.08,0.08,0.05,0.04,0.18,0.07,0.07,0.1,0.12,0.03,0.05], k=1)
-            session_duration = rn.randint(1, 30)
+            duration = rn.randint(1, 30)
             traffic = rn.randint(1, 10)
 
         place_type = priority_list[0]
@@ -93,7 +102,16 @@ finally:
                 return company_name_dict[type][rn.randint(0, len(company_name_dict[type])-1)]
         company_id = company(place_type)
 
-        wifi_users.append([phone_number, session_start, session_duration, traffic, company_id])
+        # генератор девайса
+        device = rn.choices(['Android', 'iOS', 'Windows', 'MacOS'],
+                                              weights=[0.5,0.25,0.19,0.06], k=1)[0]
+
+        #способ идентификации
+        ident_type = rn.choices(['SMS', 'Call', 'ESIA'],
+                                              weights=[0.88,0.09,0.03], k=1)[0]        
+
+
+        wifi_users.append([phone_number, device, timestamp, duration, traffic, company_id])
         df_wifi_users = pd.DataFrame(wifi_users)
 
   with open('wifi_users.csv', 'a', newline='', encoding='utf-8-sig') as csvfile2:
