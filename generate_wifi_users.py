@@ -2,8 +2,8 @@ import random as rn
 import datetime
 import pandas as pd
 
-global timestamp
-timestamp = datetime.datetime.strptime('2018-02-04 00:00:00.000', '%Y-%m-%d %H:%M:%S.%f')
+start_date = datetime.datetime.strptime('2018-02-04 00:00:00.000', '%Y-%m-%d %H:%M:%S.%f')
+timestamp = start_date
 wifi_users = []
 user_prirost = 0 #коэффициент прироста числа пользователей wifi, в среднем в день на 1
 
@@ -13,16 +13,17 @@ try:
     df_wifi_users = pd.read_csv(csvfile0, header=None)
     last_row = len(df_wifi_users.index)-1
     timestamp = datetime.datetime.strptime(df_wifi_users.loc[last_row,3], '%Y-%m-%d %H:%M:%S.%f')
-    user_prirost = (timestamp - datetime.datetime.strptime('2018-02-04 00:00:00.000', '%Y-%m-%d %H:%M:%S.%f')).days
+    user_prirost = (timestamp - start_date).days
 
 except Exception as e:
-    print(e)
+    print(f'Exception: {e}')
 
 finally:
   #открываем rtk_users и по случайному юзеру генерируем трафик, длительность сессии и
   #место его подключения
   with open('rtk_users.csv', newline='', encoding='utf-8-sig') as csvfile:
     df_rtk_users = pd.read_csv(csvfile, header=None)
+    rtk_users_len = len(df_rtk_users.index)-1
 
     #распределение количества подключения пользователей в течении суток (каждый час), эмпирически
     distribution = [rn.randint(30,40), rn.randint(15,25), rn.randint(7,13), rn.randint(6,10), rn.randint(7,13),
@@ -31,16 +32,17 @@ finally:
                     rn.randint(140,180), rn.randint(130,170), rn.randint(90,130), rn.randint(80,120), rn.randint(110,150),
                     rn.randint(115,155), rn.randint(100,140), rn.randint(70,100), rn.randint(40,60)]
     for intensity in distribution:
+      connection = intensity + user_prirost
 
 
-      for i in range(intensity + user_prirost):
+      for i in range(connection):
 
-        user = rn.randint(0,len(df_rtk_users.index)-1)
+        user = rn.randint(0,rtk_users_len)
         phone_number = df_rtk_users.loc[user,0]
         age = df_rtk_users.loc[user,2]
 
         # генератор даты и времени
-        timestamp += datetime.timedelta(hours = 1/intensity)
+        timestamp += datetime.timedelta(hours = 1/connection)
 
         # генератор выбора места от его веса для разных возрастов
         # генератор интервала времени по нормальному распределению
@@ -108,13 +110,13 @@ finally:
 
         #способ идентификации
         ident_type = rn.choices(['SMS', 'Call', 'ESIA'],
-                                              weights=[0.88,0.09,0.03], k=1)[0]        
+                                              weights=[0.88,0.09,0.03], k=1)[0]
 
 
         wifi_users.append([phone_number, device, ident_type, timestamp, duration, traffic, company_id])
         df_wifi_users = pd.DataFrame(wifi_users)
 
-  with open('wifi_users.csv', 'a', newline='', encoding='utf-8-sig') as csvfile2:
+  with open('wifi_users.csv', 'w', newline='', encoding='utf-8-sig') as csvfile2:
     df_wifi_users.to_csv(csvfile2, index=False, header=False)
 
   print("End")
