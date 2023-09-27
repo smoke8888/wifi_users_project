@@ -33,8 +33,11 @@
 5. **csv_to_hdfs_rtk_users.py** - код, выполняющий сохранение таблицы rtk_users.csv в parquet файл hdfs файловой системы Hadoop
 6. **csv_to_hdfs_company.py** - код, выполняющий сохранение таблицы company.csv в parquet файл hdfs файловой системы Hadoop
 7. **csv_to_hdfs_wifi_users.py** - код, выполняющий сохранение таблицы wifi_users.csv в parquet файл hdfs файловой системы Hadoop методом **append**
-8. **rtk_users.csv** - фрагмент справочной таблицы о пользователях Оперератора
-9. **company.csv** - фрагмент справочной таблицы об организациях (компаниях), предоставляющих доступ к публичному wifi
-10. **wifi_users.csv** - фрагмент рабочей таблицы о пользователях публичного wifi
+8. **krasnickiy_data_DAG.py** - Apache Airflow DAG, выполняющий вызов скриптов **generate_wifi_users.py** и **csv_to_hdfs_wifi_users.py** на удаленном сервере
+9. **krasnickiy_srav_DAG.py** - Apache Airflow DAG, выполняющий вызов скриптов **csv_to_hdfs_rtk_users.py** и  **csv_to_hdfs_company.py** на удаленном сервере
+10. **krasnickiy_MV_upd_dag.py** - Apache Airflow DAG, выполняющий обращение к Greenplum для обновления материализованного представления, содержащего итоговый датасет 
+11. **rtk_users.csv** - фрагмент справочной таблицы о пользователях Оперератора
+12. **company.csv** - фрагмент справочной таблицы об организациях (компаниях), предоставляющих доступ к публичному wifi
+13. **wifi_users.csv** - фрагмент рабочей таблицы о пользователях публичного wifi
 
 	 
